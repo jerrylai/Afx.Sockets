@@ -13,7 +13,8 @@ if exist publish rd /s /q publish
 %Build% "NET471/Afx.Sockets/Afx.Sockets.csproj" /t:Rebuild /p:Configuration=Release
 %Build% "NET472/Afx.Sockets/Afx.Sockets.csproj" /t:Rebuild /p:Configuration=Release
 %Build% "NET48/Afx.Sockets/Afx.Sockets.csproj" /t:Rebuild /p:Configuration=Release
-dotnet build "NETStandard2.0/Afx.Sockets/Afx.Sockets.csproj" -c Release 
+dotnet build "NETStandard2.0/Afx.Sockets/Afx.Sockets.csproj" -c Release
+dotnet build "NETStandard2.1/Afx.Sockets/Afx.Sockets.csproj" -c Release
 cd publish
 del /q/s *.pdb
 pause
