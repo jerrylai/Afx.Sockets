@@ -14,6 +14,11 @@ namespace Afx.Sockets
     /// </summary>
     public sealed class TcpSocketAsync : TcpBaseClientAsync
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sendBufferSize"></param>
+        /// <param name="receiveBufferSize"></param>
         public TcpSocketAsync(int sendBufferSize = 8 * 1024, int receiveBufferSize = 8 * 1024)
             : base(sendBufferSize, receiveBufferSize)
         {
@@ -25,7 +30,13 @@ namespace Afx.Sockets
         {
 
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="buffer"></param>
+        /// <param name="cache"></param>
+        /// <param name="data"></param>
+        /// <returns></returns>
         protected override bool ReceiveData(BufferModel buffer, CacheModel cache, out List<byte[]> data)
         {
             data = null;
@@ -90,7 +101,11 @@ namespace Afx.Sockets
 
             return true;
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
         public override bool Send(byte[] data)
         {
             return base.Send(SocketHelper.ToSendData(data));

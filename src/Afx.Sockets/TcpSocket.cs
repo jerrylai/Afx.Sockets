@@ -214,7 +214,9 @@ namespace Afx.Sockets
             int result = 0;
             if (SocketHelper.IsWindows() && this.IsConnected)
             {
+#pragma warning disable CA1416 // 验证平台兼容性
                 result = this.socket.IOControl(IOControlCode.KeepAliveValues, SocketHelper.GetTcpKeepAlive(keepAliveTime, keepAliveInterval), null);
+#pragma warning restore CA1416 // 验证平台兼容性
             }
             return result;
         }

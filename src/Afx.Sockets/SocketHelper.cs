@@ -77,7 +77,10 @@ namespace Afx.Sockets.Common
 
             return result;
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public static bool IsWindows()
         {
             bool result = false;

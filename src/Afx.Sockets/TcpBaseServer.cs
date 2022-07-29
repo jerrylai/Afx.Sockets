@@ -174,7 +174,13 @@ namespace Afx.Sockets
             else
                 this.BeginAccept(null);
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="client"></param>
+        /// <param name="sendBufferSize"></param>
+        /// <param name="receiveBufferSize"></param>
+        /// <returns></returns>
         protected abstract TcpBaseClientAsync Accept(Socket client, int sendBufferSize, int receiveBufferSize);
 
         private void BeginAccept(object obj)
@@ -221,7 +227,10 @@ namespace Afx.Sockets
         {
             this.Dispose(true);
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="disposing"></param>
         protected virtual void Dispose(bool disposing)
         {
             if (disposing)

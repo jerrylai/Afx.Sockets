@@ -6,6 +6,9 @@ using System.Text;
 
 namespace Afx.Sockets
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public interface ITcpClientAsync : IDisposable
     {
         /// <summary>

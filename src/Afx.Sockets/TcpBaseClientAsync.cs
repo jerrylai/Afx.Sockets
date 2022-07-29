@@ -34,6 +34,10 @@ namespace Afx.Sockets
         /// 接收数据回调
         /// </summary>
         public event TcpReceiveEvent ReceiveEvent;
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="data"></param>
         protected virtual void OnReceiveEvent(List<byte[]> data)
         {
             if (this.ReceiveEvent != null)
@@ -49,6 +53,10 @@ namespace Afx.Sockets
         /// 异常回调
         /// </summary>
         public event TcpErrorEvent ErrorEvent;
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="ex"></param>
         protected virtual void OnErrorEvent(Exception ex)
         {
             bool flag = !this.isClose;
@@ -62,6 +70,10 @@ namespace Afx.Sockets
         /// 正在接收数据回调
         /// </summary>
         public event TcpReadingEvent ReadingEvent;
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="length"></param>
         protected virtual void OnReadingEvent(int length)
         {
             if (this.ReadingEvent != null)
@@ -78,6 +90,10 @@ namespace Afx.Sockets
         /// 连接成功回调
         /// </summary>
         public event TcpAsyncConnectEvent AsyncConnectEvent;
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="isSuccess"></param>
         protected virtual void OnAsyncConnectEvent(bool isSuccess)
         {
             if (this.AsyncConnectEvent != null)
@@ -190,7 +206,9 @@ namespace Afx.Sockets
             int result = 0;
             if (SocketHelper.IsWindows() && this.IsConnected)
             {
+#pragma warning disable CA1416 // 验证平台兼容性
                 result = this.m_socket.IOControl(IOControlCode.KeepAliveValues, SocketHelper.GetTcpKeepAlive(keepAliveTime, keepAliveInterval), null);
+#pragma warning restore CA1416 // 验证平台兼容性
             }
             return result;
         }
@@ -410,7 +428,13 @@ namespace Afx.Sockets
                 this.networkStream = null;
             }
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="buffer"></param>
+        /// <param name="cache"></param>
+        /// <param name="data"></param>
+        /// <returns></returns>
         protected abstract bool ReceiveData(BufferModel buffer, CacheModel cache, out List<byte[]> data);
 
         private void OnReceive(IAsyncResult ar)
@@ -446,7 +470,10 @@ namespace Afx.Sockets
                 this.OnErrorEvent(ex);
             }
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="dispose"></param>
         protected void Dispose(bool dispose)
         {
             if (dispose)

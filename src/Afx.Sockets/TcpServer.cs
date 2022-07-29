@@ -13,6 +13,13 @@ namespace Afx.Sockets
     /// </summary>
     public sealed class TcpServer : TcpBaseServer
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="client"></param>
+        /// <param name="sendBufferSize"></param>
+        /// <param name="receiveBufferSize"></param>
+        /// <returns></returns>
         protected override TcpBaseClientAsync Accept(Socket client, int sendBufferSize, int receiveBufferSize)
         {
             return new TcpSocketAsync(client, sendBufferSize, receiveBufferSize);
