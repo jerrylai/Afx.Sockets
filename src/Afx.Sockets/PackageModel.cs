@@ -5,40 +5,37 @@ using System.Text;
 namespace Afx.Sockets.Models
 {
     /// <summary>
-    /// Receive BufferModel
+    /// 
     /// </summary>
-    public class BufferModel
+    public class PackageModel
     {
         /// <summary>
-        /// 缓存大小
+        /// 
         /// </summary>
-        public int Size { get; private set; }
+        public int Size { get; set; }
         /// <summary>
-        /// 成功读取位置
+        /// 
         /// </summary>
         public int Position { get; set; }
         /// <summary>
-        /// 缓存
+        /// 
         /// </summary>
         public byte[] Data { get; set; }
         /// <summary>
-        /// 初始化
+        /// 
         /// </summary>
-        /// <param name="size">缓存大小</param>
-        public BufferModel(int size = 8 * 1024)
+        public PackageModel()
         {
-            if (size <= 0) throw new ArgumentException("size is error!");
-            this.Position = 0;
-            this.Size = size < 16 ? 16 : (size > 8 * 1024 ? 8 * 1024 : size);
-            this.Data = new byte[this.Size];
+            this.Clear();
         }
-
         /// <summary>
-        /// 清除读取数据
+        /// 
         /// </summary>
         public void Clear()
         {
+            this.Size = 0;
             this.Position = 0;
+            this.Data = null;
         }
     }
 }

@@ -40,53 +40,56 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\..\src\Afx.Sockets\ITcpClientAsync.cs">
-      <Link>Interfaces\ITcpClientAsync.cs</Link>
-    </Compile>
-    <Compile Include="..\..\src\Afx.Sockets\ITcpServer.cs">
-      <Link>Interfaces\ITcpServer.cs</Link>
-    </Compile>
-    <Compile Include="..\..\src\Afx.Sockets\TcpBaseClientAsync.cs">
-      <Link>Impl\TcpBaseClientAsync.cs</Link>
-    </Compile>
-    <Compile Include="..\..\src\Afx.Sockets\TcpBaseServer.cs">
-      <Link>Impl\TcpBaseServer.cs</Link>
-    </Compile>
-    <Compile Include="..\..\src\Assembly.cs">
-      <Link>Properties\Assembly.cs</Link>
-    </Compile>
-    <Compile Include="..\..\src\Afx.Sockets\BufferModel.cs">
-      <Link>Models\BufferModel.cs</Link>
-    </Compile>
-    <Compile Include="..\..\src\Afx.Sockets\CacheModel.cs">
-      <Link>Models\CacheModel.cs</Link>
+    <Compile Include="..\..\src\Afx.Sockets\AsyncTcpSocket.cs">
+      <Link>AsyncTcpSocket.cs</Link>
     </Compile>
     <Compile Include="..\..\src\Afx.Sockets\Delegate.cs">
       <Link>Delegate.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Afx.Sockets\Properties\AssemblyInfo.cs">
-      <Link>Properties\AssemblyInfo.cs</Link>
+    <Compile Include="..\..\src\Afx.Sockets\IAsyncTcpSocket.cs">
+      <Link>Interfaces\IAsyncTcpSocket.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Afx.Sockets\SocketHelper.cs">
-      <Link>Common\SocketHelper.cs</Link>
+    <Compile Include="..\..\src\Afx.Sockets\IntPackageAsyncTcpSocket.cs">
+      <Link>IntPackageAsyncTcpSocket.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\Afx.Sockets\TcpSendData.cs">
-      <Link>Models\TcpSendData.cs</Link>
+    <Compile Include="..\..\src\Afx.Sockets\IntPackageTcpServer.cs">
+      <Link>IntPackageTcpServer.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Afx.Sockets\IntPackageTcpSocket.cs">
+      <Link>IntPackageTcpSocket.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Afx.Sockets\ITcpServer.cs">
+      <Link>Interfaces\ITcpServer.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Afx.Sockets\ITcpSocket.cs">
+      <Link>Interfaces\ITcpSocket.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Afx.Sockets\PackageModel.cs">
+      <Link>Models\PackageModel.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Afx.Sockets\ReadBuffer.cs">
+      <Link>Models\ReadBuffer.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Afx.Sockets\SocketUtils.cs">
+      <Link>Utils\SocketUtils.cs</Link>
     </Compile>
     <Compile Include="..\..\src\Afx.Sockets\TcpServer.cs">
       <Link>TcpServer.cs</Link>
-    </Compile>
-    <Compile Include="..\..\src\Afx.Sockets\TcpSocket.cs">
-      <Link>TcpSocket.cs</Link>
-    </Compile>
-    <Compile Include="..\..\src\Afx.Sockets\TcpSocketAsync.cs">
-      <Link>TcpSocketAsync.cs</Link>
     </Compile>
     <Compile Include="..\..\src\Afx.Sockets\UdpSendData.cs">
       <Link>UdpSendData.cs</Link>
     </Compile>
     <Compile Include="..\..\src\Afx.Sockets\UdpServer.cs">
       <Link>UdpServer.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Afx.Sockets\UpstreamEndPoint.cs">
+      <Link>UpstreamEndPoint.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Assembly.cs">
+      <Link>Properties\Assembly.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\Afx.Sockets\Properties\AssemblyInfo.cs">
+      <Link>Properties\AssemblyInfo.cs</Link>
     </Compile>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -1,18 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Net.Sockets;
 using System.Net;
-using System.Threading;
 using Afx.Sockets.Models;
-using Afx.Sockets.Common;
+using Afx.Sockets.Utils;
 
 namespace Afx.Sockets
 {
     /// <summary>
-    /// TcpBaseClientAsync
+    /// AsyncTcpSocket
     /// </summary>
-    public abstract class TcpBaseClientAsync : ITcpClientAsync
+    public abstract class AsyncTcpSocket : IAsyncTcpSocket
     {
         /// <summary>
         /// 发送队列大小
@@ -21,8 +19,8 @@ namespace Afx.Sockets
 
         private Socket m_socket;
         private NetworkStream networkStream;
-        private BufferModel m_buffer;
-        private CacheModel m_cache = new CacheModel();
+        private ReadBuffer m_buffer;
+        private PackageModel m_cache = new PackageModel();
         private volatile bool isClose = true;
         private volatile bool isDisposed = false;
         private volatile bool isSend = false;
@@ -164,25 +162,25 @@ namespace Afx.Sockets
         /// <summary>
         /// 构造函数
         /// </summary>
-        public TcpBaseClientAsync(int sendBufferSize = 8 * 1024, int receiveBufferSize = 8 * 1024)
+        public AsyncTcpSocket(int sendBufferSize = 8 * 1024, int receiveBufferSize = 8 * 1024)
         {
             int max = 8 * 1024;
             int min = 16;
             this.SendBufferSize = sendBufferSize < min ? min : (sendBufferSize > max ? max : sendBufferSize);
             this.ReceiveBufferSize = receiveBufferSize < min ? min : (receiveBufferSize > max ? max : receiveBufferSize);
-            this.m_buffer = new BufferModel(this.ReceiveBufferSize);
+            this.m_buffer = new ReadBuffer(this.ReceiveBufferSize);
         }
 
         /// <summary>
         /// 构造函数
         /// </summary>
-        protected TcpBaseClientAsync(Socket socket, int sendBufferSize = 8 * 1024, int receiveBufferSize = 8 * 1024)
+        protected AsyncTcpSocket(Socket socket, int sendBufferSize = 8 * 1024, int receiveBufferSize = 8 * 1024)
         {
             int max = 8 * 1024;
             int min = 16;
             this.SendBufferSize = sendBufferSize < min ? min : (sendBufferSize > max ? max : sendBufferSize);
             this.ReceiveBufferSize = receiveBufferSize < min ? min : (receiveBufferSize > max ? max : receiveBufferSize);
-            this.m_buffer = new BufferModel(this.ReceiveBufferSize);
+            this.m_buffer = new ReadBuffer(this.ReceiveBufferSize);
 
             this.m_socket = socket;
             this.isClose = false;
@@ -204,10 +202,10 @@ namespace Afx.Sockets
         public virtual int SetKeepAlive(int keepAliveTime, int keepAliveInterval)
         {
             int result = 0;
-            if (SocketHelper.IsWindows() && this.IsConnected)
+            if (SocketUtils.IsWindows() && this.IsConnected)
             {
 #pragma warning disable CA1416 // 验证平台兼容性
-                result = this.m_socket.IOControl(IOControlCode.KeepAliveValues, SocketHelper.GetTcpKeepAlive(keepAliveTime, keepAliveInterval), null);
+                result = this.m_socket.IOControl(IOControlCode.KeepAliveValues, SocketUtils.GetTcpKeepAlive(keepAliveTime, keepAliveInterval), null);
 #pragma warning restore CA1416 // 验证平台兼容性
             }
             return result;
@@ -337,7 +335,7 @@ namespace Afx.Sockets
                 this.m_buffer.Clear();
                 this.m_cache.Clear();
                 this.networkStream = new NetworkStream(this.m_socket);
-                this.networkStream.BeginRead(this.m_buffer.Data, this.m_buffer.Position, this.m_buffer.Size, this.OnReceive, null);
+                this.networkStream.BeginRead(this.m_buffer.Data, this.m_buffer.ReadCount, this.m_buffer.MaxSize, this.OnReceive, null);
             }
             catch (Exception ex)
             {
@@ -368,18 +366,36 @@ namespace Afx.Sockets
             return false;
         }
 
+        /// <summary>
+        /// 发送数据
+        /// </summary>
+        /// <param name="dataArr">数据</param>
+        public virtual bool Send(byte[][] dataArr)
+        {
+            if(dataArr != null && dataArr.Length > 0)
+            {
+                lock (this.sendLock)
+                {
+                    if (this.sendQueue.Count + dataArr.Length <= SEND_QUEUE_SIZE * 2)
+                    {
+                        foreach (var data in dataArr) this.sendQueue.Enqueue(data);
+                        this.BeginSend();
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
         private void BeginSend()
         {
             if (!this.isSend && this.IsConnected && sendQueue.Count > 0)
             {
                 this.isSend = true;
                 byte[] data = this.sendQueue.Dequeue();
-                
-                TcpSendData state = new TcpSendData();
-                state.Buffer = data;
-                state.BufferIndex = 0;
-                try { this.networkStream.BeginWrite(state.Buffer, 0, state.Buffer.Length, this.OnSend, state); }
-                catch (Exception ex) { this.OnErrorEvent(ex); }
+                try { this.networkStream.BeginWrite(data, 0, data.Length, this.OnSend, null); }
+                catch (Exception ex) { this.isSend = false; this.OnErrorEvent(ex); }
             }
         }
 
@@ -390,23 +406,10 @@ namespace Afx.Sockets
                 this.networkStream.EndWrite(ar);
                 this.isSend = false;
                 this.BeginSend();
-
-                //int sendLength = this.m_socket.EndSend(ar);
-                //TcpSendData state = ar.AsyncState as TcpSendData;
-                //state.BufferIndex += sendLength;
-                //if (state.BufferIndex < state.Buffer.Length)
-                //{
-                //    this.m_socket.BeginSend(state.Buffer, state.BufferIndex, state.Buffer.Length - state.BufferIndex, SocketFlags.None,
-                //        this.OnSend, state);
-                //}
-                //else
-                //{
-                //    this.isSend = false;
-                //    this.BeginSend();
-                //}
             }
             catch (Exception ex)
             {
+                this.isSend = false;
                 this.OnErrorEvent(ex);
             }
         }
@@ -422,8 +425,7 @@ namespace Afx.Sockets
             {
                 this.isStartConnect = false;
                 if(this.networkStream != null) try { this.networkStream.Close(); } catch { }
-                try { this.m_socket.Shutdown(SocketShutdown.Both); }
-                catch { }
+                try { this.m_socket.Shutdown(SocketShutdown.Both); } catch { }
                 this.m_socket.Close();
                 this.networkStream = null;
             }
@@ -435,7 +437,7 @@ namespace Afx.Sockets
         /// <param name="cache"></param>
         /// <param name="data"></param>
         /// <returns></returns>
-        protected abstract bool ReceiveData(BufferModel buffer, CacheModel cache, out List<byte[]> data);
+        protected abstract bool ReceiveData(ReadBuffer buffer, PackageModel cache, out List<byte[]> data);
 
         private void OnReceive(IAsyncResult ar)
         {
@@ -449,7 +451,7 @@ namespace Afx.Sockets
                     return;
                 }
 
-                this.m_buffer.Position = this.m_buffer.Position + readLength;
+                this.m_buffer.AddRead(readLength);
 
                 this.OnReadingEvent(readLength);
 
@@ -457,7 +459,7 @@ namespace Afx.Sockets
                 if (this.ReceiveData(this.m_buffer, this.m_cache, out data))
                 {
                     if (data != null) this.OnReceiveEvent(data);
-                    this.networkStream.BeginRead(this.m_buffer.Data, this.m_buffer.Position, this.m_buffer.Size - this.m_buffer.Position,
+                    this.networkStream.BeginRead(this.m_buffer.Data, this.m_buffer.ReadCount, this.m_buffer.MaxSize - this.m_buffer.ReadCount,
                         this.OnReceive, null);
                 }
                 else

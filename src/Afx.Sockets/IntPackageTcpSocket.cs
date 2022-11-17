@@ -1,17 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Net.Sockets;
 using System.Net;
-using System.Threading;
-using Afx.Sockets.Common;
+using Afx.Sockets.Utils;
 
 namespace Afx.Sockets
 {
     /// <summary>
-    /// TcpSocket
+    /// IntPackageTcpSocket
     /// </summary>
-    public sealed class TcpSocket : IDisposable
+    public class IntPackageTcpSocket : ITcpSocket
     {
         private Socket socket = null;
         private volatile bool isDisposed = false;
@@ -115,7 +112,7 @@ namespace Afx.Sockets
         /// <param name="receiveBufferSize"></param>
         /// <param name="sendTimeout">（毫秒）</param>
         /// <param name="receiveTimeout">（毫秒）</param>
-        public TcpSocket(int sendBufferSize = 8 * 1024, int receiveBufferSize = 8 * 1024,
+        public IntPackageTcpSocket(int sendBufferSize = 8 * 1024, int receiveBufferSize = 8 * 1024,
             int sendTimeout = 0, int receiveTimeout = 0)
         {
             if (sendBufferSize < 0) throw new ArgumentException("sendBufferSize is error!");
@@ -137,7 +134,7 @@ namespace Afx.Sockets
         /// <param name="host">服务端ip或域名</param>
         /// <param name="port">服务端端口</param>
         /// <param name="millisecondsTimeout">（毫秒）</param>
-        public bool Connect(string host, int port, int millisecondsTimeout = 0)
+        public virtual bool Connect(string host, int port, int millisecondsTimeout = 0)
         {
             if (string.IsNullOrEmpty(host)) throw new ArgumentNullException("host");
             if (millisecondsTimeout < 0) throw new ArgumentException("millisecondsTimeout is error!");
@@ -209,13 +206,13 @@ namespace Afx.Sockets
         /// <param name="keepAliveTime">连接多长时间（毫秒）没有数据就开始发送心跳包，有数据传递的时候不发送心跳包</param>
         /// <param name="keepAliveInterval">每隔多长时间（毫秒）发送一个心跳包，发5次（系统默认值）</param>
         /// <returns>The number of bytes in the optionOutValue parameter.</returns>
-        public int SetKeepAlive(int keepAliveTime, int keepAliveInterval)
+        public virtual int SetKeepAlive(int keepAliveTime, int keepAliveInterval)
         {
             int result = 0;
-            if (SocketHelper.IsWindows() && this.IsConnected)
+            if (SocketUtils.IsWindows() && this.IsConnected)
             {
 #pragma warning disable CA1416 // 验证平台兼容性
-                result = this.socket.IOControl(IOControlCode.KeepAliveValues, SocketHelper.GetTcpKeepAlive(keepAliveTime, keepAliveInterval), null);
+                result = this.socket.IOControl(IOControlCode.KeepAliveValues, SocketUtils.GetTcpKeepAlive(keepAliveTime, keepAliveInterval), null);
 #pragma warning restore CA1416 // 验证平台兼容性
             }
             return result;
@@ -225,15 +222,20 @@ namespace Afx.Sockets
         /// 发送数据
         /// </summary>
         /// <param name="data">数据</param>
-        public bool Send(byte[] data)
+        public virtual bool Send(byte[] data)
         {
             if (data != null || data.Length > 0 && this.IsConnected)
             {
-                byte[] buffer = SocketHelper.ToSendData(data);
+                byte[] buffer = SocketUtils.ToPrefixBytes(data.Length);
                 int count = 0;
                 while (count < buffer.Length)
                 {
                     count += this.socket.Send(buffer, count, buffer.Length - count, SocketFlags.None);
+                }
+                count = 0;
+                while (count < data.Length)
+                {
+                    count += this.socket.Send(data, count, data.Length - count, SocketFlags.None);
                 }
 
                 return true;
@@ -247,15 +249,15 @@ namespace Afx.Sockets
         /// 接收数据
         /// </summary>
         /// <returns></returns>
-        public byte[] Receive()
+        public virtual byte[] Receive()
         {
-            byte[] buffer = new byte[SocketHelper.PREFIX_LENGTH];
+            byte[] buffer = new byte[SocketUtils.PREFIX_LENGTH];
             int count = 0;
-            while (count < SocketHelper.PREFIX_LENGTH)
+            while (count < SocketUtils.PREFIX_LENGTH)
             {
-                count += this.socket.Receive(buffer, count, SocketHelper.PREFIX_LENGTH - count, SocketFlags.None);
+                count += this.socket.Receive(buffer, count, SocketUtils.PREFIX_LENGTH - count, SocketFlags.None);
             }
-            int length = SocketHelper.ToPrefixLength(buffer);
+            int length = SocketUtils.ToPrefixLength(buffer);
             byte[] data = new byte[length];
             count = 0;
             while (count < length)
@@ -269,12 +271,11 @@ namespace Afx.Sockets
         /// <summary>
         /// 关闭连接
         /// </summary>
-        public void Close()
+        public virtual void Close()
         {
             if (this.IsConnected || this.isStartConnect)
             {
-                try { this.socket.Shutdown(SocketShutdown.Both); }
-                catch { }
+                try { this.socket.Shutdown(SocketShutdown.Both); } catch { }
                 this.socket.Close();
             }
         }
@@ -282,7 +283,7 @@ namespace Afx.Sockets
         /// <summary>
         /// 释放所有资源
         /// </summary>
-        public void Dispose()
+        public virtual void Dispose()
         {
             if (!this.isDisposed)
             {

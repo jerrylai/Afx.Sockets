@@ -7,9 +7,9 @@ using System.Text;
 namespace Afx.Sockets
 {
     /// <summary>
-    /// 
+    /// IAsyncTcpSocket
     /// </summary>
-    public interface ITcpClientAsync : IDisposable
+    public interface IAsyncTcpSocket : IDisposable
     {
         /// <summary>
         /// 接收数据回调
@@ -74,6 +74,11 @@ namespace Afx.Sockets
         /// </summary>
         /// <param name="data">数据</param>
         bool Send(byte[] data);
+        /// <summary>
+        /// 发送数据
+        /// </summary>
+        /// <param name="dataArr">数据</param>
+        bool Send(byte[][] dataArr);
 
         /// <summary>
         /// 关闭连接

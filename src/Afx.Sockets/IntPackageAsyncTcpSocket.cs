@@ -1,31 +1,28 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Net.Sockets;
-using System.Net;
-using System.Threading;
 using Afx.Sockets.Models;
-using Afx.Sockets.Common;
+using Afx.Sockets.Utils;
 
 namespace Afx.Sockets
 {
     /// <summary>
-    /// TcpClientAsync
+    /// IntPackageAsyncTcpSocket
     /// </summary>
-    public sealed class TcpSocketAsync : TcpBaseClientAsync
+    public sealed class IntPackageAsyncTcpSocket : AsyncTcpSocket
     {
         /// <summary>
         /// 
         /// </summary>
         /// <param name="sendBufferSize"></param>
         /// <param name="receiveBufferSize"></param>
-        public TcpSocketAsync(int sendBufferSize = 8 * 1024, int receiveBufferSize = 8 * 1024)
+        public IntPackageAsyncTcpSocket(int sendBufferSize = 8 * 1024, int receiveBufferSize = 8 * 1024)
             : base(sendBufferSize, receiveBufferSize)
         {
 
         }
 
-        internal TcpSocketAsync(Socket socket, int sendBufferSize = 8 * 1024, int receiveBufferSize = 8 * 1024)
+        internal IntPackageAsyncTcpSocket(Socket socket, int sendBufferSize = 8 * 1024, int receiveBufferSize = 8 * 1024)
             : base(socket, sendBufferSize, receiveBufferSize)
         {
 
@@ -37,30 +34,30 @@ namespace Afx.Sockets
         /// <param name="cache"></param>
         /// <param name="data"></param>
         /// <returns></returns>
-        protected override bool ReceiveData(BufferModel buffer, CacheModel cache, out List<byte[]> data)
+        protected override bool ReceiveData(ReadBuffer buffer, PackageModel cache, out List<byte[]> data)
         {
             data = null;
-            if (cache.Size == 0 && buffer.Position < SocketHelper.PREFIX_LENGTH)
+            if (cache.Size == 0 && buffer.ReadCount < SocketUtils.PREFIX_LENGTH)
             {
                 return true;
             }
             else
             {
                 int start = 0;
-                while (start < cache.Position + buffer.Position)
+                while (start < cache.Position + buffer.ReadCount)
                 {
                     int len = 0;
                     if (cache.Position > 0) len = cache.Size;
                     else
                     {
-                        byte[] arrlen = new byte[SocketHelper.PREFIX_LENGTH];
+                        byte[] arrlen = new byte[SocketUtils.PREFIX_LENGTH];
                         Array.Copy(buffer.Data, start, arrlen, 0, arrlen.Length);
-                        len = SocketHelper.ToPrefixLength(arrlen);
+                        len = SocketUtils.ToPrefixLength(arrlen);
                     }
 
-                    if (len <= 0 || len > SocketHelper.MAX_PREFIX_LENGTH) return false;
+                    if (len <= 0 || len > SocketUtils.MAX_PREFIX_LENGTH) return false;
 
-                    if (start + len <= cache.Position + buffer.Position)
+                    if (start + len <= cache.Position + buffer.ReadCount)
                     {
                         if (cache.Position > 0)
                         {
@@ -79,7 +76,7 @@ namespace Afx.Sockets
                             start += len;
                         }
 
-                        if (start == buffer.Position)
+                        if (start == buffer.ReadCount)
                         {
                             buffer.Clear();
                         }
@@ -91,8 +88,8 @@ namespace Afx.Sockets
                             cache.Data = new byte[len];
                             cache.Size = len;
                         }
-                        Array.Copy(buffer.Data, start, cache.Data, cache.Position, buffer.Position - start);
-                        cache.Position = cache.Position + buffer.Position - start;
+                        Array.Copy(buffer.Data, start, cache.Data, cache.Position, buffer.ReadCount - start);
+                        cache.Position = cache.Position + buffer.ReadCount - start;
                         start = cache.Position;
                         buffer.Clear();
                     }
@@ -108,7 +105,7 @@ namespace Afx.Sockets
         /// <returns></returns>
         public override bool Send(byte[] data)
         {
-            return base.Send(SocketHelper.ToSendData(data));
+            return base.Send(SocketUtils.ToSendData(data));
         }
     }
 }

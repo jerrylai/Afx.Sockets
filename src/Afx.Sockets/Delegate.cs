@@ -12,28 +12,28 @@ namespace Afx.Sockets
     /// </summary>
     /// <param name="client">TcpSocket</param>
     /// <param name="isSuccess">isSuccess</param>
-    public delegate void TcpAsyncConnectEvent(ITcpClientAsync client, bool isSuccess);
+    public delegate void TcpAsyncConnectEvent(IAsyncTcpSocket client, bool isSuccess);
 
     /// <summary>
     /// tcp socket 接收数据回调
     /// </summary>
     /// <param name="client">TcpSocket</param>
     /// <param name="data">接收数据</param>
-    public delegate void TcpReceiveEvent(ITcpClientAsync client, List<byte[]> data);
+    public delegate void TcpReceiveEvent(IAsyncTcpSocket client, List<byte[]> data);
 
     /// <summary>
     /// tcp socket 异常回调
     /// </summary>
     /// <param name="client">TcpSocket</param>
     /// <param name="ex">Exception</param>
-    public delegate void TcpErrorEvent(ITcpClientAsync client, Exception ex);
+    public delegate void TcpErrorEvent(IAsyncTcpSocket client, Exception ex);
 
     /// <summary>
     /// tcp soket 正在接收数据回调
     /// </summary>
     /// <param name="client">TcpSocketAsync</param>
     /// <param name="length">数据总长度</param>
-    public delegate void TcpReadingEvent(ITcpClientAsync client, int length);
+    public delegate void TcpReadingEvent(IAsyncTcpSocket client, int length);
     #endregion
 
     #region tcp server
@@ -41,7 +41,7 @@ namespace Afx.Sockets
     /// tcp server  监听客户端连接回调
     /// </summary>
     /// <param name="client">TcpSocket</param>
-    public delegate void TcpAcceptEvent(ITcpClientAsync client);
+    public delegate void TcpAcceptEvent(IAsyncTcpSocket client);
 
     /// <summary>
     /// tcp server 异常回调

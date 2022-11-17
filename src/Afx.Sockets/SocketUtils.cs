@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Afx.Sockets.Common
+namespace Afx.Sockets.Utils
 {
     /// <summary>
     /// SocketHelper
     /// </summary>
-    public static class SocketHelper
+    public static class SocketUtils
     {
         /// <summary>
         /// 数据包头长度
@@ -70,7 +70,7 @@ namespace Afx.Sockets.Common
             if(data != null && data.Length > 0)
             {
                 result = new byte[4 + data.Length];
-                byte[] prefixBytes = SocketHelper.ToPrefixBytes(data.Length);
+                byte[] prefixBytes = SocketUtils.ToPrefixBytes(data.Length);
                 Array.Copy(prefixBytes, result, prefixBytes.Length);
                 Array.Copy(data, 0, result, prefixBytes.Length, data.Length);
             }
